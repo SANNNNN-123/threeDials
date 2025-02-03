@@ -74,17 +74,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      {/* New outer background circle */}
-      <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          width: size * 1.1, // Slightly larger than the main dial
-          height: size * 1.1,
-          backgroundColor: '#1a1a1a',
-          zIndex: -1, // Place it behind everything
-          boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-        }}
-      />
+      
 
       {/* Rotating group containing middle circle and numbers */}
       <div 
@@ -94,13 +84,15 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         onTouchStart={handleMouseDown}
         style={{ transform: `rotate(${rotation}deg)` }}
       >
+        
         {/* Middle rotating circle */}
         <div 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{ 
-            width: size * 1.04,
-            height: size * 1.04,
-            background: 'linear-gradient(to bottom, #4a4a4a, #2a2a2a)'
+            width: size * 1.0,
+            height: size * 1.0,
+            background: 'linear-gradient(to bottom, #4a4a4a, #2a2a2a)',
+            border: '1px solid rgba(255,255,255,0.1)'
           }}
         />
 
@@ -113,12 +105,12 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
             <div
               key={`marker-${i}`}
               className={`absolute origin-bottom ${
-                isMainMarker ? 'h-3' : isFiveMarker ? 'h-3' : 'h-2'
+                isMainMarker ? 'h-4' : isFiveMarker ? 'h-3' : 'h-2'
               }`}
               style={{
                 left: '50%',
                 top: size * 0.005,
-                width: isMainMarker ? '2px' : '1px',
+                width: isMainMarker ? '4px' : '3px',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 transform: `translateX(-50%) rotate(${angle}deg)`,
                 transformOrigin: `50% ${(size * 0.55) - (size * 0.06)}px`,
@@ -127,28 +119,42 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
           );
         })}
 
+        {/* Background circle around numbers */}
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: size * 0.90,
+            height: size * 0.90,
+            background: 'linear-gradient(to bottom, #3a3a3a, #1a1a1a)',
+            zIndex: 1,  // Changed from 0 to -1 to place it behind
+            boxShadow: '0 0 10px rgba(0,0,0,0.5)'
+          }}
+        />
+
         {/* Numbers */}
         {Array.from({ length: 10 }, (_, i) => {
           const number = (i * 10) % 100;
-          const angle = i * (360 / 10) + (number === 0 ? 0 : 2); // Only add offset for non-zero numbers
-          const textRotation = (number / 10) * 36; // Each number rotates 36 degrees (360° / 10 numbers)
+          const angle = i * (360 / 10) + (number === 0 ? 0 : 2);
+          const textRotation = (number / 10) * 36;
           
           return (
             <div
               key={`number-${i}`}
-              className="absolute font-medium"
+              className="absolute font-semibold"
               style={{
                 left: '50%',
                 top: '50%',
                 color: 'white',
-                fontSize: `${size * 0.072}px`,
+                fontSize: `${size * 0.088}px`,
+                fontFamily: 'DuePuntoZero Pro Bold, sans-serif',
                 transform: `
                   translate(-50%, -50%) 
                   rotate(${angle}deg) 
                   translateY(-${size * 0.41}px) 
                   rotate(${-angle + textRotation}deg)
                 `,
-                transformOrigin: 'center center'
+                transformOrigin: 'center center',
+                zIndex: 1
               }}
             >
               {number}
@@ -156,6 +162,8 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
           );
         })}
       </div>
+
+      
 
       {/* Dark grey background circle */}
       <div 
@@ -177,11 +185,22 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
           height: size * 0.62,
           background: 'linear-gradient(to bottom, #666666, #444444)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          fontFamily: 'DuePuntoZero Pro Bold, sans-serif',
           border: '2px solid #333',
           zIndex: 2
         }}
       >
-        <div className="text-5xl text-white">
+        <div 
+          className="text-6xl text-white flex items-center justify-center"
+          style={{
+            transform: 'translateY(-10px)',  // Fine-tune vertical alignment
+            height: '100%',                 // Ensure full height for centering
+            width: '100%',                  // Ensure full width for centering
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
           {currentNumber}
         </div>
       </div>
@@ -191,7 +210,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         className="absolute w-1 h-5"
         style={{
           left: '50%',
-          top: size * (-0.01),
+          top: size * (-0.00),
           backgroundColor: '#ff3333',
           transform: 'translateX(-50%)',
           zIndex: 50
