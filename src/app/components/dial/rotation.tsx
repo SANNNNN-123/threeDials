@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Graph from './graph';
 
 interface RotaryDialProps {
   size?: number;
+  value?: number;
   onChange?: (value: number) => void;
 }
 
@@ -79,10 +81,22 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
       {/* Rotating group containing middle circle and numbers */}
       <div 
         ref={dialRef}
-        className="absolute inset-0 cursor-pointer"
+        className="absolute inset-0 cursor-pointer rounded-full"
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
-        style={{ transform: `rotate(${rotation}deg)` }}
+        style={{ 
+          transform: `rotate(${rotation}deg)`,
+          background: `
+            linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.08) 100%),
+            linear-gradient(to bottom, #4a4a4a, #2a2a2a),
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 65%)
+          `,
+          boxShadow: `
+            inset 0 2px 4px rgba(255,255,255,0.15),
+            inset 0 -2px 4px rgba(0,0,0,0.3)
+          `,
+          border: '1px solid rgba(0,0,0,0.3)'
+        }}
       >
         
         {/* Middle rotating circle */}
@@ -110,10 +124,13 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
               style={{
                 left: '50%',
                 top: size * 0.005,
+                zIndex: 2,
                 width: isMainMarker ? '4px' : '3px',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 transform: `translateX(-50%) rotate(${angle}deg)`,
                 transformOrigin: `50% ${(size * 0.55) - (size * 0.06)}px`,
+                borderRadius: '0 0 2px 2px',  // Changed to bottom corners
+                clipPath: 'inset(0 0 -5px 0)'  // Ensure the rounded bottom is visible
               }}
             />
           );
@@ -125,9 +142,17 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
           style={{
             width: size * 0.90,
             height: size * 0.90,
-            background: 'linear-gradient(to bottom, #3a3a3a, #1a1a1a)',
-            zIndex: 1,  // Changed from 0 to -1 to place it behind
-            boxShadow: '0 0 10px rgba(0,0,0,0.5)'
+            background: `
+              linear-gradient(170deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%),
+              linear-gradient(to bottom, #3a3a3a, #1a1a1a),
+              radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%)
+            `,
+            zIndex: 1,
+            boxShadow: `
+              inset 0 1px 1px rgba(255,255,255,0.1),
+              inset 0 -2px 3px rgba(0,0,0,0.2),
+              0 0 10px rgba(0,0,0,0.5)
+            `
           }}
         />
 
@@ -220,4 +245,21 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   );
 };
 
-export default RotaryDial;
+interface RotationProps {
+  onChange?: (value: number) => void;
+}
+
+export default function Rotation({ onChange }: RotationProps) {
+  const [value, setValue] = useState(0)
+
+  const handleRotation = (newValue: number) => {
+    setValue(newValue)
+    onChange?.(newValue)
+  }
+
+  return (
+    <div>
+      <RotaryDial value={value} onChange={handleRotation} />
+    </div>
+  )
+}

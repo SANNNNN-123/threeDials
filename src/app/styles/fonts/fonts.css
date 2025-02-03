@@ -3,4 +3,13 @@
   src: url('/fonts/duepuntozero-pro-bold.otf') format('opentype');
   font-weight: bold;
   font-style: normal;
+}
+
+@font-face {
+  font-family: 'DuePuntoZero-Light';
+  src: url('/fonts/DuePuntoZero-Light.woff2') format('woff2'),
+       url('/fonts/DuePuntoZero-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 } 
