@@ -79,9 +79,9 @@ const ECGPulse: React.FC<ECGPulseProps> = ({ width, height, value, targets = [] 
     function drawLine() {
       ctx!.clearRect(0, 0, width, height)
       
-      // Draw the main ECG line with reduced opacity
+      // Draw the main ECG line
       ctx!.beginPath()
-      ctx!.strokeStyle = "rgba(0, 255, 0, 0.2)"
+      ctx!.strokeStyle = "rgba(0, 255, 0, 0.4)"
       ctx!.lineWidth = 2
 
       const step = width / (data.length - 1)
@@ -129,7 +129,7 @@ const ECGPulse: React.FC<ECGPulseProps> = ({ width, height, value, targets = [] 
       }
       ctx!.stroke()
 
-      // Draw the moving dot with increased opacity
+      // Draw the moving dot
       const dotPosition = Math.floor((value / 100) * (data.length - 1))
       if (dotPosition >= 0 && dotPosition < data.length) {
         const dotX = dotPosition * step
@@ -145,7 +145,7 @@ const ECGPulse: React.FC<ECGPulseProps> = ({ width, height, value, targets = [] 
         const glowSize = isAtSpike ? 12 : 6
         const dotSize = isAtSpike ? 4 : 2
         
-        // Draw dot glow with increased opacity
+        // Draw dot glow
         const gradient = ctx!.createRadialGradient(dotX, dotY, 0, dotX, dotY, glowSize)
         gradient.addColorStop(0, isAtSpike ? "rgba(0, 255, 0, 1)" : "rgba(0, 255, 0, 0.8)")
         gradient.addColorStop(1, "rgba(0, 255, 0, 0)")
@@ -155,7 +155,7 @@ const ECGPulse: React.FC<ECGPulseProps> = ({ width, height, value, targets = [] 
         ctx!.arc(dotX, dotY, glowSize, 0, Math.PI * 2)
         ctx!.fill()
         
-        // Draw dot center with increased opacity
+        // Draw dot center
         ctx!.beginPath()
         ctx!.fillStyle = "#00ff00"
         ctx!.arc(dotX, dotY, dotSize, 0, Math.PI * 2)

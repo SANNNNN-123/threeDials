@@ -200,7 +200,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
                 transform: `
                   translate(-50%, -50%) 
                   rotate(${angle}deg) 
-                  translateY(-${size * 0.41}px) 
+                  translateY(-${size * 0.39}px) 
                   rotate(${-angle + textRotation}deg)
                 `,
                 transformOrigin: 'center center',
@@ -243,7 +243,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         <div 
           className="text-6xl text-white flex items-center justify-center"
           style={{
-            transform: 'translateY(-10px)',  
+            transform: 'translateY(-5px)',  
             height: '100%',                
             width: '100%',                 
             display: 'flex',

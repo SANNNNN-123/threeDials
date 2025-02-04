@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Rotation from "./components/dial/rotation"
 import Graph from "./components/dial/graph"
 import Navbar from "./components/nav/navbar"
+import ValueBoxes from "./components/dial/ValueBoxes"
 
 // Function to generate random unique numbers
 const generateRandomTargets = () => {
@@ -17,11 +18,53 @@ const generateRandomTargets = () => {
 export default function DialPage() {
   const [value, setValue] = useState(0)
   const [targets, setTargets] = useState<number[]>([])
+  const [stoppedValues, setStoppedValues] = useState<(number | null)[]>([null, null, null])
+  const [currentBoxIndex, setCurrentBoxIndex] = useState(0)
+  const [lastValue, setLastValue] = useState(0)
+  const [isMoving, setIsMoving] = useState(false)
 
   // Initialize random targets
   useEffect(() => {
     setTargets(generateRandomTargets())
   }, [])
+
+  // Reset function
+  const resetGame = () => {
+    setStoppedValues([null, null, null])
+    setCurrentBoxIndex(0)
+    setTargets(generateRandomTargets())
+  }
+
+  // Handle dial movement detection
+  useEffect(() => {
+    if (value !== lastValue) {
+      setIsMoving(true)
+      setLastValue(value)
+    } else if (isMoving) {
+      const timer = setTimeout(() => {
+        setIsMoving(false)
+        // Update the current box value when the dial stops
+        if (currentBoxIndex < 3) {
+          setStoppedValues(prev => {
+            const newValues = [...prev]
+            newValues[currentBoxIndex] = value
+            return newValues
+          })
+          
+          // Move to next box or reset if all boxes are filled
+          const nextIndex = currentBoxIndex + 1
+          if (nextIndex >= 3) {
+            // Wait a bit before resetting to show the final state
+            setTimeout(resetGame, 2000)
+          } else {
+            setCurrentBoxIndex(nextIndex)
+          }
+        }
+      }, 1000) // Wait 1 second of no movement before considering it stopped
+
+      return () => clearTimeout(timer)
+    }
+  }, [value, lastValue, isMoving, currentBoxIndex])
 
   const handleRotation = (newValue: number) => {
     setValue(newValue)
@@ -50,9 +93,15 @@ export default function DialPage() {
           <Graph value={value} targets={targets} />
         </div>
 
+        <div className="mb-6">
+          <ValueBoxes values={stoppedValues} targets={targets} />
+        </div>
+
         <div className="space-y-8">
           <div className="text-center space-y-1">
-            <div className="text-gray-500">Target Numbers: {targets.join(', ')}</div>
+            <div className="text-gray-400">
+                Generated Numbers: {targets.join(', ')}
+            </div>
             <div className="text-gray-500">Attempts: 2</div>
             <div className="font-mono">
               <span className="text-2xl text-white">0:35.1</span>
