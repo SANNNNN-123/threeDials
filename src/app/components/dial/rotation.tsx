@@ -42,13 +42,18 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent default touch behavior
+    e.preventDefault();
     isDragging.current = true;
     lastAngle.current = getAngleFromMouse(e.nativeEvent);
   };
 
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging.current) return;
-
+    
+    // Prevent default touch behavior
+    e.preventDefault();
+    
     const currentAngle = getAngleFromMouse(e);
     const delta = currentAngle - lastAngle.current;
     
@@ -74,8 +79,24 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     };
   }, []);
 
+  // Also add touchmove prevention at component level
+  useEffect(() => {
+    const preventScroll = (e: TouchEvent) => {
+      if (isDragging.current) {
+        e.preventDefault();
+      }
+    };
+
+    // Add the event listener with passive: false to allow preventDefault()
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', preventScroll);
+    };
+  }, []);
+
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div className="relative touch-none" style={{ width: size, height: size }}>
       
 
       {/* Rotating group containing middle circle and numbers */}
