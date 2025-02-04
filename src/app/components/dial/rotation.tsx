@@ -237,13 +237,14 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
             width: size * 0.53,
             height: size * 0.53,
             backgroundColor: '#262726',
-            boxShadow: `
-              -2px 0 2px rgba(0,0,0,0.3),
-              2px 0 2px rgba(0,0,0,0.3),
-              0 -2px 2px rgba(0,0,0,0.3),  
-              0 2px 2px rgba(0,0,0,0.3) 
+            //background: 'linear-gradient(to bottom, #262726, #131313)',
+            // boxShadow: `
+            //   -2px 0 2px rgba(0,0,0,0.3),
+            //   2px 0 2px rgba(0,0,0,0.3),
+            //   0 -2px 2px rgba(0,0,0,0.3),  
+            //   0 2px 2px rgba(0,0,0,0.3) 
             
-            `,
+            // `,
             zIndex: 2
           }}
         />
@@ -264,16 +265,20 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
               className="absolute w-[9px] bg-[#2a2a2a]"
               style={{
                 height: '40px',
-                top: '37%',
+                top: '37.5%',
                 left: '50%',
                 transformOrigin: '0 50%',
-                transform: `rotate(${i * 8}deg) translateX(${size * 0.265}px)`,
+                transform: `rotate(${i * 8}deg) translateX(${size * 0.268}px)`,
                 boxShadow: '0 1px 1px rgba(0,0,0,0.5)',
                 borderRadius: '1px',
-                backgroundColor: '#262726',
+                backgroundColor: '#262726'
+                
               }}
             />
           ))}
+
+
+
         </div>
       </div>
 

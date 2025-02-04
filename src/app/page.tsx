@@ -1,12 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Rotation from "./components/dial/rotation"
 import Graph from "./components/dial/graph"
 import Navbar from "./components/nav/navbar"
 
+// Function to generate random unique numbers
+const generateRandomTargets = () => {
+  const numbers = new Set<number>()
+  while (numbers.size < 3) {
+    numbers.add(Math.floor(Math.random() * 91)) // 0-90
+  }
+  return Array.from(numbers)
+}
+
 export default function DialPage() {
   const [value, setValue] = useState(0)
+  const [targets, setTargets] = useState<number[]>([])
+
+  // Initialize random targets
+  useEffect(() => {
+    setTargets(generateRandomTargets())
+  }, [])
 
   const handleRotation = (newValue: number) => {
     setValue(newValue)
@@ -32,11 +47,12 @@ export default function DialPage() {
         <Rotation onChange={handleRotation} />
 
         <div className="w-full flex justify-center px-4">
-          <Graph value={value} />
+          <Graph value={value} targets={targets} />
         </div>
 
         <div className="space-y-8">
           <div className="text-center space-y-1">
+            <div className="text-gray-500">Target Numbers: {targets.join(', ')}</div>
             <div className="text-gray-500">Attempts: 2</div>
             <div className="font-mono">
               <span className="text-2xl text-white">0:35.1</span>
@@ -48,4 +64,3 @@ export default function DialPage() {
     </div>
   )
 }
-
