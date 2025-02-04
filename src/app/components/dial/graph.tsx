@@ -31,7 +31,7 @@ interface GraphProps {
       >
         {/* Grid Container */}
         <div 
-          className="absolute bg-black border-2 border-white"
+          className="absolute bg-black border-2 border-white "
           style={{
             top: '24px',
             bottom: '24px',

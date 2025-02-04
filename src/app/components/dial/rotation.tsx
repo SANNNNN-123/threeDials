@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import Graph from './graph';
+
 
 interface RotaryDialProps {
   size?: number;
@@ -208,7 +208,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         style={{
           width: size * 0.62,
           height: size * 0.62,
-          background: 'linear-gradient(to bottom, #666666, #444444)',
+          background: 'linear-gradient(to bottom, #666666, #424645)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
           fontFamily: 'DuePuntoZero Pro Bold, sans-serif',
           border: '2px solid #333',
@@ -218,15 +218,62 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         <div 
           className="text-6xl text-white flex items-center justify-center"
           style={{
-            transform: 'translateY(-10px)',  // Fine-tune vertical alignment
-            height: '100%',                 // Ensure full height for centering
-            width: '100%',                  // Ensure full width for centering
+            transform: 'translateY(-10px)',  
+            height: '100%',                
+            width: '100%',                 
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            zIndex: 100,
           }}
         >
           {currentNumber}
+        </div>
+        
+        {/* Smaller circle below number */}
+        <div 
+          className="absolute rounded-full"
+          style={{
+            width: size * 0.53,
+            height: size * 0.53,
+            backgroundColor: '#262726',
+            boxShadow: `
+              -2px 0 2px rgba(0,0,0,0.3),
+              2px 0 2px rgba(0,0,0,0.3),
+              0 -2px 2px rgba(0,0,0,0.3),  
+              0 2px 2px rgba(0,0,0,0.3) 
+            
+            `,
+            zIndex: 2
+          }}
+        />
+
+        {/* Gear teeth circle */}
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: size * 0.53,
+            height: size * 0.53,
+            zIndex: 1
+          }}
+        >
+          {/* Gear teeth */}
+          {Array.from({ length: 45 }).map((_, i) => (
+            <div
+              key={`gear-${i}`}
+              className="absolute w-[9px] bg-[#2a2a2a]"
+              style={{
+                height: '40px',
+                top: '37%',
+                left: '50%',
+                transformOrigin: '0 50%',
+                transform: `rotate(${i * 8}deg) translateX(${size * 0.265}px)`,
+                boxShadow: '0 1px 1px rgba(0,0,0,0.5)',
+                borderRadius: '1px',
+                backgroundColor: '#262726',
+              }}
+            />
+          ))}
         </div>
       </div>
 

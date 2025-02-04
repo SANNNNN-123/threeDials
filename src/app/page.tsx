@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Rotation from "./components/dial/rotation"
 import Graph from "./components/dial/graph"
+import Navbar from "./components/nav/navbar"
 
 export default function DialPage() {
   const [value, setValue] = useState(0)
@@ -13,7 +14,7 @@ export default function DialPage() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center"
+      className="min-h-screen w-full max-w-md mx-auto relative pt-16"
       style={{
         background: '#181818',
         backgroundImage: `
@@ -26,29 +27,15 @@ export default function DialPage() {
         `
       }}
     >
-      <div className="flex flex-col items-center space-y-16">
+      <Navbar />
+      <div className="flex flex-col items-center space-y-8 mt-8">
         <Rotation onChange={handleRotation} />
 
-        {/* Added margin and increased height for the graph */}
-        <div className="my-8">
+        <div className="w-full flex justify-center px-4">
           <Graph value={value} />
         </div>
 
         <div className="space-y-8">
-          {/* Button Controls */}
-          {/* <div className="flex gap-4 justify-center">
-            <button className="w-16 h-16 bg-white rounded-lg shadow-md text-2xl text-gray-400 hover:bg-gray-50 transition-colors">
-              —
-            </button>
-            <button className="w-16 h-16 bg-white rounded-lg shadow-md text-2xl text-gray-400 hover:bg-gray-50 transition-colors">
-              —
-            </button>
-            <button className="w-16 h-16 bg-white rounded-lg shadow-md text-2xl text-gray-400 hover:bg-gray-50 transition-colors">
-              —
-            </button>
-          </div> */}
-
-          {/* Attempts and Timer */}
           <div className="text-center space-y-1">
             <div className="text-gray-500">Attempts: 2</div>
             <div className="font-mono">
