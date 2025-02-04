@@ -23,9 +23,13 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     const normalizedRotation = ((rotation % 360) + 360) % 360;
     const number = Math.round((normalizedRotation / 360) * 99);
     const finalNumber = (99 - number) % 99;
-    setCurrentNumber(finalNumber);
-    onChange(finalNumber);
-  }, [rotation, onChange]);
+
+    // Only update state if the finalNumber has changed
+    if (finalNumber !== currentNumber) {
+      setCurrentNumber(finalNumber);
+      onChange(finalNumber);
+    }
+  }, [rotation, onChange, currentNumber]);
 
   const getAngleFromMouse = (e: MouseEvent | TouchEvent) => {
     if (!dialRef.current) return 0;

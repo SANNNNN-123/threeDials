@@ -9,14 +9,14 @@ interface GraphProps {
 }
 
 export default function Graph({ 
-  width = 300, 
-  height = 200, 
+  width = 310, 
+  height = 100, 
   value = 0,
   targets = [] 
 }: GraphProps) {
   const numbers = Array.from({ length: 11 }, (_, i) => i * 10) // [0, 10, 20, ..., 100]
   const smallNumbers = Array.from({ length: 50 }, (_, i) => i * 2) // [0, 2, 4, ..., 98]
-  const horizontalLines = 11
+  const horizontalLines = 6
   const verticalLines = numbers.length
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -72,7 +72,7 @@ export default function Graph({
       <div
         className="absolute bg-black border-2 border-white"
         style={{
-          top: "44px", // Adjusted to make room for small numbers
+          top: "44px",
           bottom: "24px",
           left: "8px",
           width: `${(numbers.length - 1) * 100}px`,
@@ -113,7 +113,7 @@ export default function Graph({
         <div className="absolute inset-0">
           <ECGPulse 
             width={(numbers.length - 1) * 100} 
-            height={height - 48} 
+            height={height - 10} 
             value={value} 
             targets={targets}
           />

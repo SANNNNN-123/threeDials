@@ -43,7 +43,7 @@ export default function DialPage() {
       }}
     >
       <Navbar />
-      <div className="flex flex-col items-center space-y-8 mt-8">
+      <div className="flex flex-col items-center space-y-6 mt-8">
         <Rotation onChange={handleRotation} />
 
         <div className="w-full flex justify-center px-4">
