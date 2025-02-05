@@ -5,6 +5,7 @@ import Rotation from "./components/dial/rotation"
 import Graph from "./components/dial/graph"
 import Navbar from "./components/nav/navbar"
 import ValueBoxes from "./components/dial/ValueBoxes"
+import HowToPlay from "./components/Instructions/Steps"
 
 // Function to generate random unique numbers
 const generateRandomTargets = () => {
@@ -22,6 +23,7 @@ export default function DialPage() {
   const [currentBoxIndex, setCurrentBoxIndex] = useState(0)
   const [lastValue, setLastValue] = useState(0)
   const [isMoving, setIsMoving] = useState(false)
+  const [showInstructions, setShowInstructions] = useState(true)
 
   // Initialize random targets
   useEffect(() => {
@@ -86,7 +88,8 @@ export default function DialPage() {
       }}
     >
       <Navbar />
-      <div className="flex flex-col items-center space-y-6 mt-8">
+      {showInstructions && <HowToPlay />}
+      <div className="flex flex-col items-center space-y-1 mt-4">
         <Rotation onChange={handleRotation} />
 
         <div className="w-full flex justify-center px-4">
@@ -102,10 +105,8 @@ export default function DialPage() {
             <div className="text-gray-400">
                 Generated Numbers: {targets.join(', ')}
             </div>
-            <div className="text-gray-500">Attempts: 2</div>
             <div className="font-mono">
-              <span className="text-2xl text-white">0:35.1</span>
-              <span className="text-gray-400 ml-2">Best: 2:30.6</span>
+              <span className="text-2xl text-white">0:35:1</span>
             </div>
           </div>
         </div>
