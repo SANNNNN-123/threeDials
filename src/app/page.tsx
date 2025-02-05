@@ -6,17 +6,10 @@ import Graph from "./components/dial/graph"
 import Navbar from "./components/nav/navbar"
 import ValueBoxes from "./components/dial/ValueBoxes"
 import HowToPlay from "./components/Instructions/Steps"
-
-// Function to generate random unique numbers
-const generateRandomTargets = () => {
-  const numbers = new Set<number>()
-  while (numbers.size < 3) {
-    numbers.add(Math.floor(Math.random() * 91)) // 0-90
-  }
-  return Array.from(numbers)
-}
+import Leaderboard from './components/leaderboard/Leaderboard'
 
 export default function DialPage() {
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [value, setValue] = useState(0)
   const [targets, setTargets] = useState<number[]>([])
   const [stoppedValues, setStoppedValues] = useState<(number | null)[]>([null, null, null])
@@ -24,49 +17,99 @@ export default function DialPage() {
   const [lastValue, setLastValue] = useState(0)
   const [isMoving, setIsMoving] = useState(false)
   const [showInstructions, setShowInstructions] = useState(true)
+  const [startTime, setStartTime] = useState<number | null>(null)
+  const [elapsedTime, setElapsedTime] = useState<string>("0:00:0")
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [gameCompleted, setGameCompleted] = useState(false)
+  const [finalTime, setFinalTime] = useState<number>(0)
+  const [finalAttempts, setFinalAttempts] = useState<number>(0)
 
-  // Initialize random targets
+  // Initialize game session
   useEffect(() => {
-    setTargets(generateRandomTargets())
+    startNewGame()
   }, [])
 
-  // Reset function
-  const resetGame = () => {
-    setStoppedValues([null, null, null])
-    setCurrentBoxIndex(0)
-    setTargets(generateRandomTargets())
+  // Update the timer effect
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (startTime && !gameCompleted && currentBoxIndex < 3) {  // Add gameCompleted check
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const deciseconds = Math.floor((now - startTime) / 100) % 10;
+        setElapsedTime(`${minutes}:${seconds.toString().padStart(2, '0')}:${deciseconds}`);
+      }, 100);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [startTime, currentBoxIndex, gameCompleted]); // Add gameCompleted to dependencies
+
+  const startNewGame = async () => {
+    try {
+      const res = await fetch('/api/game', { method: 'POST' })
+      const { sessionId, targets } = await res.json()
+      setSessionId(sessionId)
+      setTargets(targets)
+      setStartTime(Date.now())
+      setStoppedValues([null, null, null])
+      setCurrentBoxIndex(0)
+      setElapsedTime("0:00:0")
+      setGameCompleted(false)
+      setShowLeaderboard(false)
+    } catch (error) {
+      console.error('Failed to start new game:', error)
+    }
   }
 
+  
   // Handle dial movement detection
   useEffect(() => {
     if (value !== lastValue) {
       setIsMoving(true)
       setLastValue(value)
     } else if (isMoving) {
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         setIsMoving(false)
-        // Update the current box value when the dial stops
-        if (currentBoxIndex < 3) {
-          setStoppedValues(prev => {
-            const newValues = [...prev]
-            newValues[currentBoxIndex] = value
-            return newValues
-          })
+        if (currentBoxIndex < 3 && sessionId) {
+          // Record attempt in Redis
+          const game = await fetch('/api/game', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              sessionId, 
+              value,
+              timeElapsed: startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
+            })
+          }).then(res => res.json())
+
+          // First update the stopped values
+          const newValues = [...stoppedValues]
+          newValues[currentBoxIndex] = value
+          setStoppedValues(newValues)
           
-          // Move to next box or reset if all boxes are filled
-          const nextIndex = currentBoxIndex + 1
-          if (nextIndex >= 3) {
-            // Wait a bit before resetting to show the final state
-            setTimeout(resetGame, 2000)
-          } else {
-            setCurrentBoxIndex(nextIndex)
+          // Then check if all numbers are correct with the updated values
+          const allCorrect = newValues.every((val, idx) => val === targets[idx])
+          
+          if (currentBoxIndex === 2 && allCorrect) {
+            // Game completed - all three numbers are correct
+            const timeElapsed = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
+            setFinalTime(timeElapsed)
+            setFinalAttempts(game.attempts.length)
+            setGameCompleted(true)
+            setShowLeaderboard(true)
+          } else if (currentBoxIndex < 2) {
+            // Move to next number if not on last digit
+            setCurrentBoxIndex(prev => prev + 1)
           }
         }
-      }, 1000) // Wait 1 second of no movement before considering it stopped
+      }, 1000)
 
       return () => clearTimeout(timer)
     }
-  }, [value, lastValue, isMoving, currentBoxIndex])
+  }, [value, lastValue, isMoving, currentBoxIndex, sessionId, startTime, targets, stoppedValues])
 
   const handleRotation = (newValue: number) => {
     setValue(newValue)
@@ -87,7 +130,7 @@ export default function DialPage() {
         `
       }}
     >
-      <Navbar />
+      <Navbar onNewGame={startNewGame} />
       {showInstructions && <HowToPlay />}
       <div className="flex flex-col items-center space-y-1 mt-4">
         <Rotation onChange={handleRotation} />
@@ -106,11 +149,19 @@ export default function DialPage() {
                 Generated Numbers: {targets.join(', ')}
             </div>
             <div className="font-mono">
-              <span className="text-2xl text-white">0:35:1</span>
+              <span className="text-2xl text-white">{elapsedTime}</span>
             </div>
           </div>
         </div>
       </div>
+
+      <Leaderboard
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+        currentTime={gameCompleted ? finalTime : undefined}
+        currentAttempts={gameCompleted ? finalAttempts : undefined}
+        sessionId={sessionId ?? undefined}
+      />
     </div>
   )
 }
