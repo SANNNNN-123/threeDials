@@ -48,15 +48,24 @@ const ValueBox = ({ value, isCorrect, isWrongPosition, isResetting }: ValueBoxPr
 interface ValueBoxesProps {
   values: (number | null)[];
   targets: number[];
+  isDialMoving: boolean;
 }
 
-const ValueBoxes = ({ values, targets }: ValueBoxesProps) => {
+const ValueBoxes = ({ values, targets, isDialMoving }: ValueBoxesProps) => {
   const [isResetting, setIsResetting] = useState(false);
+  const [currentValues, setCurrentValues] = useState(values);
+
+  useEffect(() => {
+    // Only update values when dial is not moving
+    if (!isDialMoving) {
+      setCurrentValues(values);
+    }
+  }, [values, isDialMoving]);
 
   useEffect(() => {
     // Check if all boxes are filled
-    const allFilled = values.every(value => value !== null);
-    const allCorrect = values.every((value, index) => value === targets[index]);
+    const allFilled = currentValues.every(value => value !== null);
+    const allCorrect = currentValues.every((value, index) => value === targets[index]);
     
     if (allFilled && !allCorrect) {
       setIsResetting(true);
@@ -66,11 +75,11 @@ const ValueBoxes = ({ values, targets }: ValueBoxesProps) => {
         setIsResetting(false);
       }, 500); // Match animation duration
     }
-  }, [values, targets]);
+  }, [currentValues, targets]);
 
   return (
     <div className="flex gap-4 justify-center">
-      {values.map((value, index) => (
+      {currentValues.map((value, index) => (
         <ValueBox 
           key={index} 
           value={value} 

@@ -139,7 +139,7 @@ export default function DialPage() {
         </div>
 
         <div className="mb-6">
-          <ValueBoxes values={stoppedValues} targets={targets} />
+          <ValueBoxes values={stoppedValues} targets={targets} isDialMoving={isMoving} />
         </div>
 
         <div className="space-y-8">
