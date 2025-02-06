@@ -31,7 +31,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   // Restore use-sound implementation
   const sound = '/sound/DialSFX.mp3';
   const [playDialSound] = useSound(sound, {
-    volume: 0.05,
+    volume: 0.5,
     sprite: {
       turning: [500, 550]
     },
