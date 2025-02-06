@@ -7,7 +7,6 @@ interface LeaderboardEntry {
   name: string
   time: number
   completedAt: number
-  country?: string
 }
 
 export default function LeaderboardPage() {
@@ -19,13 +18,14 @@ export default function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      const res = await fetch('/api/game')
-      const data = await res.json()
-      setEntries(data)
+      const res = await fetch('/api/game');
+      if (!res.ok) throw new Error('Failed to fetch leaderboard');
+      const data = await res.json();
+      setEntries(data);
     } catch (error) {
-      console.error('Failed to fetch leaderboard:', error)
+      console.error('Failed to fetch leaderboard:', error);
     }
-  }
+  };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -69,9 +69,6 @@ export default function LeaderboardPage() {
                     <span className="text-2xl font-mono text-white/40 w-8">{index + 1}</span>
                     <div>
                       <div className="font-bold text-lg">{entry.name}</div>
-                      <div className="text-sm text-white/40">
-                        {entry.country || 'Unknown'}
-                      </div>
                     </div>
                   </div>
                   <div className="text-right font-mono text-xl">

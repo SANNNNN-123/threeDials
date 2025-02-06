@@ -69,7 +69,7 @@ export default function DialPage() {
     return () => clearInterval(intervalId);
   }, [startTime, currentBoxIndex, gameCompleted]);
 
-  // Handle dial movement detection and box filling
+  // Update the useEffect that handles dial movement detection
   useEffect(() => {
     if (value !== lastValue) {
       setIsMoving(true)
@@ -78,17 +78,6 @@ export default function DialPage() {
       const timer = setTimeout(async () => {
         setIsMoving(false)
         if (currentBoxIndex < 3 && sessionId) {
-          // Record attempt in Redis
-          const game = await fetch('/api/game', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sessionId, 
-              value,
-              timeElapsed: startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
-            })
-          }).then(res => res.json())
-
           // Update the stopped values
           const newValues = [...stoppedValues]
           newValues[currentBoxIndex] = value
@@ -101,7 +90,7 @@ export default function DialPage() {
               // Game completed successfully
               const timeElapsed = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
               setFinalTime(timeElapsed)
-              setFinalAttempts(game.attempts.length)
+              setFinalAttempts(currentBoxIndex + 1) // Use box index as attempt count
               setGameCompleted(true)
               setShowLeaderboard(true)
             } else {

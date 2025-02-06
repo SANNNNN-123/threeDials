@@ -48,13 +48,20 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   };
 
   const snapToNearestMarker = () => {
-    const currentRotation = totalRotation.current % 360;
-    const snapRotation = Math.round(currentRotation / SNAP_ANGLE) * SNAP_ANGLE;
-    const delta = snapRotation - currentRotation;
+    const currentRotation = totalRotation.current;
+    const currentPositiveRotation = ((currentRotation % 360) + 360) % 360;
     
-    // Update total rotation while maintaining the correct number of full turns
-    const fullTurns = Math.floor(totalRotation.current / 360) * 360;
-    const newTotalRotation = fullTurns + snapRotation;
+    // Find the nearest marker
+    const nearestMarkerIndex = Math.round(currentPositiveRotation / SNAP_ANGLE);
+    const nearestMarkerAngle = nearestMarkerIndex * SNAP_ANGLE;
+    
+    // Calculate both clockwise and counterclockwise distances
+    let deltaClockwise = nearestMarkerAngle - currentPositiveRotation;
+    if (deltaClockwise > 180) deltaClockwise -= 360;
+    if (deltaClockwise < -180) deltaClockwise += 360;
+    
+    // Apply the delta to the total rotation
+    const newTotalRotation = currentRotation + deltaClockwise;
     
     totalRotation.current = newTotalRotation;
     setRotation(newTotalRotation);
@@ -96,12 +103,12 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     if (delta < -180) delta += 360;
 
     // Add vibration effect during movement
-    const vibrationAmount = 0.3; // Adjust this value to control vibration intensity
-    const randomVibration = (Math.random() - 0.5) * vibrationAmount;
+    // const vibrationAmount = 0.3; // Adjust this value to control vibration intensity
+    // const randomVibration = (Math.random() - 0.5) * vibrationAmount;
     
     
     totalRotation.current += delta;
-    setRotation(totalRotation.current + randomVibration);
+    setRotation(totalRotation.current);
     
     // Update number based on new rotation
     const newNumber = getNumberFromRotation(totalRotation.current);
@@ -174,7 +181,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         onTouchStart={handleMouseDown}
         style={{ 
           transform: `rotate(${rotation}deg)`,
-          transition: isDragging.current ? 'transform 0.05s linear' : 'transform 0.3s ease-out',
+          transition: isDragging.current ? 'none' : 'transform 0.2s ease-out',
           background: `
             linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.08) 100%),
             linear-gradient(to bottom, #4a4a4a, #2a2a2a),

@@ -42,14 +42,5 @@ export const gameService = {
     const game = await this.getGame(sessionId)
     if (!game) return
     
-    // Add to leaderboard only when game is completed with a name
-    await redis.zadd('leaderboard', {
-      score: timeElapsed,
-      member: JSON.stringify({
-        name: playerName,
-        time: timeElapsed,
-        completedAt: Date.now()
-      })
-    })
   }
 }

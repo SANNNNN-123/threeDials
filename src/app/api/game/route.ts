@@ -12,27 +12,12 @@ export async function POST() {
   }
 }
 
-export async function PUT(request: Request) {
-  try {
-    const { sessionId, value, timeElapsed, playerName } = await request.json()
-    const game = await gameService.addAttempt(sessionId, value)
-    
-    if (timeElapsed && playerName) {
-      await gameService.completeGame(sessionId, timeElapsed, playerName)
-    }
-    
-    return NextResponse.json(game)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update game' }, { status: 500 })
-  }
-}
-
-// Add leaderboard endpoints
+// Leaderboard retrieval
 export async function GET() {
   try {
     const leaderboard = await redis.zrange('leaderboard', 0, 9, {
       withScores: true,
-      rev: true // Change to true to get lowest times first
+      rev: true
     })
 
     const entries = leaderboard
@@ -46,28 +31,31 @@ export async function GET() {
   }
 }
 
-// Add leaderboard submission endpoint
+// Leaderboard submission
 export async function PATCH(request: Request) {
   try {
-    const { name, sessionId, time } = await request.json()
+    const { name, sessionId, time } = await request.json();
     
-    if (!name || !sessionId) {
-      return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
+    if (!name || !sessionId || !time) {
+      return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
     }
 
-    // Store with time as score (lower is better)
-    await redis.zadd('leaderboard', {
-      score: time, // Lower times will be ranked higher
+    const result = await redis.zadd('leaderboard', {
+      score: time,
       member: JSON.stringify({
         name,
         time,
         completedAt: Date.now()
       })
-    })
+    });
 
-    return NextResponse.json({ success: true })
+    if (!result) {
+      throw new Error('Failed to add to leaderboard');
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error adding to leaderboard:', error)
-    return NextResponse.json({ error: 'Failed to add to leaderboard' }, { status: 500 })
+    console.error('Error adding to leaderboard:', error);
+    return NextResponse.json({ error: 'Failed to add to leaderboard' }, { status: 500 });
   }
 }
