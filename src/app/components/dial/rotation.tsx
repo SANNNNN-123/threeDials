@@ -7,7 +7,7 @@ import useSound from 'use-sound';
 const SNAP_THRESHOLD = 0.1; // Seconds before snapping
 const SNAP_ANGLE = 360 / 99; // Angle between each marker
 const TOTAL_NUMBERS = 99; // Total numbers on the dial
-const VIBRATION_PATTERN = [5]; // Single short vibration
+const VIBRATION_PATTERN = [200]; // Single short vibration
 
 
 
