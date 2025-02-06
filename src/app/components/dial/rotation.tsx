@@ -7,6 +7,8 @@ import useSound from 'use-sound';
 const SNAP_THRESHOLD = 0.1; // Seconds before snapping
 const SNAP_ANGLE = 360 / 99; // Angle between each marker
 const TOTAL_NUMBERS = 99; // Total numbers on the dial
+const VIBRATION_PATTERN = [5]; // Single short vibration
+
 
 
 interface RotaryDialProps {
@@ -27,8 +29,11 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   const lastMoveTime = useRef(Date.now());
   const snapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const totalRotation = useRef(0); // Track total rotation including multiple turns
+  const [isShaking, setIsShaking] = useState(false);
+  const vibrateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Restore use-sound implementation
+  // Comment out sound related code
+  /*
   const sound = '/sound/DialSFX.mp3';
   const [playDialSound] = useSound(sound, {
     volume: 0.5,
@@ -42,6 +47,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   const [hasInteracted, setHasInteracted] = useState(false);
   const prevNumber = useRef(currentNumber);
   const soundIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  */
 
 
 
@@ -97,24 +103,38 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   };
 
   const handleFirstInteraction = () => {
+    // Comment out sound related code
+    /*
     if (!hasInteracted) {
       setHasInteracted(true);
     }
+    */
   };
 
   const startSound = () => {
+    // Comment out sound related code
+    /*
     playDialSound({ id: 'turning' });
-    
-    // Play sound every 200ms while dragging
     soundIntervalRef.current = setInterval(() => {
       playDialSound({ id: 'turning' });
     }, 0);
+    */
   };
 
   const stopSound = () => {
+    // Comment out sound related code
+    /*
     if (soundIntervalRef.current) {
       clearInterval(soundIntervalRef.current);
       soundIntervalRef.current = null;
+    }
+    */
+  };
+
+  const vibrate = () => {
+    // Vibrate if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(VIBRATION_PATTERN);
     }
   };
 
@@ -129,7 +149,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     }
 
     handleFirstInteraction();
-    startSound();
+    // startSound();  // Comment this out
   };
 
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
@@ -158,6 +178,9 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
       setCurrentNumber(newNumber);
       onChange(newNumber);
     }
+
+    // Vibrate on movement
+    vibrate();
     
     lastAngle.current = currentAngle;
 
@@ -172,7 +195,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     if (isDragging.current) {
       isDragging.current = false;
       snapToNearestMarker();
-      stopSound(); // Stop sound on mouse up
+      // stopSound();  // Comment this out
     }
   };
 
@@ -212,10 +235,21 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     };
   }, []);
 
-  // Clean up interval on unmount
+  // Remove or comment out sound cleanup effect
+  /*
   useEffect(() => {
     return () => {
       stopSound();
+    };
+  }, []);
+  */
+
+  // Clean up timeout
+  useEffect(() => {
+    return () => {
+      if (vibrateTimeoutRef.current) {
+        clearTimeout(vibrateTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -226,7 +260,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
       {/* Rotating group containing middle circle and numbers */}
       <div 
         ref={dialRef}
-        className="absolute inset-0 cursor-pointer rounded-full"
+        className={`absolute inset-0 cursor-pointer rounded-full ${isShaking ? 'animate-shake' : ''}`}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
         style={{ 

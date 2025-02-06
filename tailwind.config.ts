@@ -55,6 +55,16 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		keyframes: {
+  			shake: {
+  				'0%, 100%': { transform: 'rotate(var(--tw-rotate, 0)) translateX(0)' },
+  				'25%': { transform: 'rotate(var(--tw-rotate, 0)) translateX(-1px)' },
+  				'75%': { transform: 'rotate(var(--tw-rotate, 0)) translateX(1px)' }
+  			}
+  		},
+  		animation: {
+  			shake: 'shake 0.15s cubic-bezier(.36,.07,.19,.97) both'
   		}
   	}
   },
