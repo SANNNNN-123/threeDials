@@ -2,6 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
+const SNAP_THRESHOLD = 0.1; // Seconds before snapping
+const SNAP_ANGLE = 360 / 99; // Angle between each marker
+const TOTAL_NUMBERS = 99; // Total numbers on the dial
 
 interface RotaryDialProps {
   size?: number;
@@ -18,18 +21,17 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
   const dialRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastAngle = useRef(0);
+  const lastMoveTime = useRef(Date.now());
+  const snapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const totalRotation = useRef(0); // Track total rotation including multiple turns
 
-  useEffect(() => {
-    const normalizedRotation = ((rotation % 360) + 360) % 360;
-    const number = Math.round((normalizedRotation / 360) * 99);
-    const finalNumber = (99 - number) % 99;
-
-    // Only update state if the finalNumber has changed
-    if (finalNumber !== currentNumber) {
-      setCurrentNumber(finalNumber);
-      onChange(finalNumber);
-    }
-  }, [rotation, onChange, currentNumber]);
+  const getNumberFromRotation = (rot: number) => {
+    // Normalize rotation to positive value
+    const normalizedRotation = ((rot % 360) + 360) % 360;
+    // Calculate number based on rotation (reversed direction)
+    const number = Math.round((normalizedRotation / 360) * TOTAL_NUMBERS);
+    return (TOTAL_NUMBERS - number) % TOTAL_NUMBERS;
+  };
 
   const getAngleFromMouse = (e: MouseEvent | TouchEvent) => {
     if (!dialRef.current) return 0;
@@ -45,28 +47,83 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     return Math.atan2(clientY - center.y, clientX - center.x) * (180 / Math.PI);
   };
 
+  const snapToNearestMarker = () => {
+    const currentRotation = totalRotation.current % 360;
+    const snapRotation = Math.round(currentRotation / SNAP_ANGLE) * SNAP_ANGLE;
+    const delta = snapRotation - currentRotation;
+    
+    // Update total rotation while maintaining the correct number of full turns
+    const fullTurns = Math.floor(totalRotation.current / 360) * 360;
+    const newTotalRotation = fullTurns + snapRotation;
+    
+    totalRotation.current = newTotalRotation;
+    setRotation(newTotalRotation);
+
+    // Calculate and set the new number
+    const newNumber = getNumberFromRotation(newTotalRotation);
+    if (newNumber !== currentNumber) {
+      setCurrentNumber(newNumber);
+      onChange(newNumber);
+    }
+  };
+
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    // Prevent default touch behavior
     e.preventDefault();
     isDragging.current = true;
     lastAngle.current = getAngleFromMouse(e.nativeEvent);
+    lastMoveTime.current = Date.now();
+    
+    if (snapTimeoutRef.current) {
+      clearTimeout(snapTimeoutRef.current);
+    }
   };
 
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging.current) return;
     
-    // Prevent default touch behavior
     e.preventDefault();
+    lastMoveTime.current = Date.now();
+    
+    if (snapTimeoutRef.current) {
+      clearTimeout(snapTimeoutRef.current);
+    }
     
     const currentAngle = getAngleFromMouse(e);
-    const delta = currentAngle - lastAngle.current;
+    let delta = currentAngle - lastAngle.current;
     
-    setRotation(prev => prev + delta);
+    // Handle angle wrapping
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+
+    // Add vibration effect during movement
+    const vibrationAmount = 0.3; // Adjust this value to control vibration intensity
+    const randomVibration = (Math.random() - 0.5) * vibrationAmount;
+    
+    
+    totalRotation.current += delta;
+    setRotation(totalRotation.current + randomVibration);
+    
+    // Update number based on new rotation
+    const newNumber = getNumberFromRotation(totalRotation.current);
+    if (newNumber !== currentNumber) {
+      setCurrentNumber(newNumber);
+      onChange(newNumber);
+    }
+    
     lastAngle.current = currentAngle;
+
+    snapTimeoutRef.current = setTimeout(() => {
+      if (Date.now() - lastMoveTime.current >= SNAP_THRESHOLD * 1000) {
+        snapToNearestMarker();
+      }
+    }, SNAP_THRESHOLD * 1000);
   };
 
   const handleMouseUp = () => {
-    isDragging.current = false;
+    if (isDragging.current) {
+      isDragging.current = false;
+      snapToNearestMarker();
+    }
   };
 
   useEffect(() => {
@@ -83,7 +140,6 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
     };
   }, []);
 
-  // Also add touchmove prevention at component level
   useEffect(() => {
     const preventScroll = (e: TouchEvent) => {
       if (isDragging.current) {
@@ -91,11 +147,18 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
       }
     };
 
-    // Add the event listener with passive: false to allow preventDefault()
     document.addEventListener('touchmove', preventScroll, { passive: false });
 
     return () => {
       document.removeEventListener('touchmove', preventScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (snapTimeoutRef.current) {
+        clearTimeout(snapTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -111,6 +174,7 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
         onTouchStart={handleMouseDown}
         style={{ 
           transform: `rotate(${rotation}deg)`,
+          transition: isDragging.current ? 'transform 0.05s linear' : 'transform 0.3s ease-out',
           background: `
             linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.08) 100%),
             linear-gradient(to bottom, #4a4a4a, #2a2a2a),
@@ -302,8 +366,6 @@ const RotaryDial: React.FC<RotaryDialProps> = ({
             />
           ))}
 
-
-
         </div>
       </div>
 
@@ -327,16 +389,16 @@ interface RotationProps {
 }
 
 export default function Rotation({ onChange }: RotationProps) {
-  const [value, setValue] = useState(0)
+  const [value, setValue] = useState(0);
 
   const handleRotation = (newValue: number) => {
-    setValue(newValue)
-    onChange?.(newValue)
-  }
+    setValue(newValue);
+    onChange?.(newValue);
+  };
 
   return (
     <div>
       <RotaryDial value={value} onChange={handleRotation} />
     </div>
-  )
+  );
 }

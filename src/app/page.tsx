@@ -24,29 +24,6 @@ export default function DialPage() {
   const [finalTime, setFinalTime] = useState<number>(0)
   const [finalAttempts, setFinalAttempts] = useState<number>(0)
 
-  // Initialize game session
-  useEffect(() => {
-    startNewGame()
-  }, [])
-
-  // Update the timer effect
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (startTime && !gameCompleted && currentBoxIndex < 3) {  // Add gameCompleted check
-      intervalId = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - startTime) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        const deciseconds = Math.floor((now - startTime) / 100) % 10;
-        setElapsedTime(`${minutes}:${seconds.toString().padStart(2, '0')}:${deciseconds}`);
-      }, 100);
-    }
-
-    return () => clearInterval(intervalId);
-  }, [startTime, currentBoxIndex, gameCompleted]); // Add gameCompleted to dependencies
-
   const startNewGame = async () => {
     try {
       const res = await fetch('/api/game', { method: 'POST' })
@@ -64,8 +41,35 @@ export default function DialPage() {
     }
   }
 
-  
-  // Handle dial movement detection
+  const resetBoxes = () => {
+    setStoppedValues([null, null, null])
+    setCurrentBoxIndex(0)
+  }
+
+  // Initialize game session
+  useEffect(() => {
+    startNewGame()
+  }, [])
+
+  // Update the timer effect
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (startTime && !gameCompleted && currentBoxIndex < 3) {
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const deciseconds = Math.floor((now - startTime) / 100) % 10;
+        setElapsedTime(`${minutes}:${seconds.toString().padStart(2, '0')}:${deciseconds}`);
+      }, 100);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [startTime, currentBoxIndex, gameCompleted]);
+
+  // Handle dial movement detection and box filling
   useEffect(() => {
     if (value !== lastValue) {
       setIsMoving(true)
@@ -85,22 +89,28 @@ export default function DialPage() {
             })
           }).then(res => res.json())
 
-          // First update the stopped values
+          // Update the stopped values
           const newValues = [...stoppedValues]
           newValues[currentBoxIndex] = value
           setStoppedValues(newValues)
           
-          // Then check if all numbers are correct with the updated values
-          const allCorrect = newValues.every((val, idx) => val === targets[idx])
-          
-          if (currentBoxIndex === 2 && allCorrect) {
-            // Game completed - all three numbers are correct
-            const timeElapsed = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
-            setFinalTime(timeElapsed)
-            setFinalAttempts(game.attempts.length)
-            setGameCompleted(true)
-            setShowLeaderboard(true)
-          } else if (currentBoxIndex < 2) {
+          // Check if all numbers are filled
+          if (currentBoxIndex === 2) {
+            const allCorrect = newValues.every((val, idx) => val === targets[idx])
+            if (allCorrect) {
+              // Game completed successfully
+              const timeElapsed = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
+              setFinalTime(timeElapsed)
+              setFinalAttempts(game.attempts.length)
+              setGameCompleted(true)
+              setShowLeaderboard(true)
+            } else {
+              // Add delay before resetting boxes
+              setTimeout(() => {
+                resetBoxes()
+              }, 1000) // 1 second delay
+            }
+          } else {
             // Move to next number if not on last digit
             setCurrentBoxIndex(prev => prev + 1)
           }
@@ -124,9 +134,9 @@ export default function DialPage() {
           linear-gradient(to top, #1d1d1d, #131313)
         `,
         boxShadow: `
-          0 0.2em 0.1em 0.05em rgba(255, 255, 255, 0.1) inset,
-          0 -0.2em 0.1em 0.05em rgba(0, 0, 0, 0.5) inset,
-          0 0.5em 0.65em 0 rgba(0, 0, 0, 0.3)
+          0 0.2em 0.1em 0.05em rgba(255,255,255,0.1) inset,
+          0 -0.2em 0.1em 0.05em rgba(0,0,0,0.5) inset,
+          0 0.5em 0.65em 0 rgba(0,0,0,0.3)
         `
       }}
     >
@@ -135,7 +145,7 @@ export default function DialPage() {
       <div className="flex flex-col items-center space-y-1 mt-4">
         <Rotation onChange={handleRotation} />
 
-        <div className="w-full flex justify-center px-4">
+        <div className="w-full flex justify-center px-4 mb-6">
           <Graph value={value} targets={targets} />
         </div>
 
@@ -146,7 +156,7 @@ export default function DialPage() {
         <div className="space-y-8">
           <div className="text-center space-y-1">
             <div className="text-gray-400">
-                Generated Numbers: {targets.join(', ')}
+              Generated Numbers: {targets.join(', ')}
             </div>
             <div className="font-mono">
               <span className="text-2xl text-white">{elapsedTime}</span>

@@ -10,7 +10,7 @@ export default function Navbar({ onNewGame }: NavbarProps) {
   const [showInfo, setShowInfo] = useState(false)
 
   return (
-    <nav className="fixed top-0 w-full max-w-md mx-auto left-0 right-0 h-10 flex items-center px-2">
+    <nav className="fixed top-0 w-full max-w-md mx-auto left-0 right-0 h-18 flex items-center px-2">
       <div className="flex items-center justify-between w-full">
         <div className={`
           flex items-center 

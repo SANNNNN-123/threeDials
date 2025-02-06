@@ -35,24 +35,24 @@ const HowToPlay = () => {
             Spin the dial to find three number combinations
           </p>
 
-          <div className="flex justify-between gap-2">
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-1">
-                <span className="text-2xl font-duepuntozero-pro-bold text-white">3</span>
+          <div className="flex justify-center gap-1">
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mb-1">
+                <span className="text-xl font-duepuntozero-pro-bold text-white">3</span>
               </div>
-              <span className="text-xs text-white/80 text-center">Correct spot</span>
+              <span className="text-xs text-white/80 text-center">Correct</span>
             </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center mb-1">
-                <span className="text-2xl font-duepuntozero-pro-bold text-white">6</span>
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center mb-1">
+                <span className="text-xl font-duepuntozero-pro-bold text-white">6</span>
               </div>
-              <span className="text-xs text-white/80 text-center">Wrong spot</span>
+              <span className="text-xs text-white/80 text-center">Wrong</span>
             </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-12 h-12 bg-neutral-800 rounded-lg flex items-center justify-center mb-1">
-                <span className="text-2xl font-duepuntozero-pro-bold text-white">8</span>
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 bg-neutral-800 rounded-lg flex items-center justify-center mb-1">
+                <span className="text-xl font-duepuntozero-pro-bold text-white">8</span>
               </div>
-              <span className="text-xs text-white/80 text-center">Not in code</span>
+              <span className="text-xs text-white/80 text-center">No code</span>
             </div>
           </div>
 

@@ -61,7 +61,6 @@ export async function PATCH(request: Request) {
       member: JSON.stringify({
         name,
         time,
-        country: 'Unknown', // Add default country
         completedAt: Date.now()
       })
     })
